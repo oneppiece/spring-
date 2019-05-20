@@ -1,0 +1,164 @@
+# ioc容器的三种注入方式
+   * 构造函数注入
+   * setter属性注入
+   * 接口注入
+## Resource接口
+## BeanFactory
+## ApplicationContext
+## WebApplicationContext
+## 父子容器
+## Bean的生命周期
+* Bean自身的方法。
+    * 调用构造函数实力化Bean。
+    * setter设置Bean的属性。
+    * init-method和destroy-method所指定的方法。
+* Bean级生命周期接口方法。
+    * BeanNameAware
+    * BeanFactoryAware
+    * InitalizingBean，DisposableBean
+* 容器级生命周期方法。
+    * InstantiationAwareBeanPostProcessor     
+    * BeanPostProcessor
+* 工厂后处理器接口方法。
+    * AspectJWeavingEnabler 
+    * CustomerAutowireConfigurer
+    * ConfigurationClassPostProcessor
+### 在容器中装载bean
+  * 根据BeanDefinition生成bean注册表，bean的配置方式：
+    * xml
+    * Groovry
+    * Java类
+    *  注解
+  * Bean的注入方式：
+    * 属性注入（通过反射调用setter，要有setterXXX方法，不要求有XXX变量，要求命名规范）
+    * 构造函数
+       * 按类型
+       * 按索引
+       * 按类型和索引
+       * 按自身类型自动反射匹配
+    * 工厂方法注入
+       * 非静态工厂
+       *  静态工厂
+       *  **注意bean之间的循环引用**
+### 注入参数
+  * 引入其他bean       
+  * 内部bean       
+  * null值       
+  * 级联属性       
+  * 集合       
+  * 自动装配
+    * byName       
+    * byType       
+    * constructor       
+    * autodetect     
+      
+### 方法注入
+  **如何在singleton的bean中注入一个prototype的bean？**
+  * lookup方法注入
+  * 方法替换MethodReplacer
+  * （基于CGlib，spring拥有复写bean的能力）
+
+#### bean之间的依赖关系
+  `Class A {
+     String xx = "1";
+  }`
+  
+  `Class B {
+     init(){
+       A.xx = "2";
+     }
+  }`
+  
+  `Class c {
+    A a;
+  }`
+  
+  C依赖A，不直接依赖B，如何保证在C注入A之前先运行了B.init()方法？
+  使用dependsOn指定bean的前置依赖bean。
+  
+  `<bean id='c' class='xx.xx.xx.C' depends-on='sysInit,sysInit2'></bean>`
+  
+  `<bean id='a' class='xx.xx.xx.A'></bean>`
+  
+  `<bean id='sysInit' class='xx.xx.xx.B'></bean>`
+  
+  `<bean id='sysInit2' class='xx.xx.xx.C'></bean>`
+  
+## bean的作用域
+  * singleton
+  * prototype
+  * request(WebApplicationContext)
+  * session(WebApplicationContext)
+  * globalSession(WebApplicationContext)
+  
+  **后三个作用域，需要配置ServletRequestListener。
+  ServletRequestListener与ServletContextListener的区别？**
+  
+  在singleton或prototype的bean中注入request作用域的bean？
+## factoryBean接口
+  * 若想获取factoryBean创建的bean，则getBean("xx")此时Spring会调用factoryBean的getObject("xx")。
+  * 若想获取factoryBean本身，则getBean("&xx")。
+## 基于注解的配置
+  <context:component-scan base-package="xx" resource-pattern=".class" use-default-filter="false">
+       <context:include-filter type="regex" expression="com\.xx\.xx.*"></context:include-filter>
+       <context:exclude-filter type="aspectj" expression="com.xx..*Controller+"></context:exclude-filter>
+    </context:component-scan>
+  * 扫描顺序： 先exclude再include
+    
+| type | 示例 | 说明 |
+| :------: | :------: | :------: |
+| annotation | com.xx.XxxAnnotation | 所有标注了XxxAnnotation的类 |
+| assignable | com.xx.XxxService | 继承或拓展了XxxService的类 |
+| aspectj | com.xx..* Service+ | (aspectj表达式)类名以Service结束及继承或扩展他们的类 |
+| regex | com\.xx\..* | (正则)所有xx包下的类 |
+| customer | XxxFilter | XxxFilter必须实现TypeFilter接口 |
+         
+ * @Autowired(required=?)
+   * 用再属性和方法上
+   ```
+       //会讲所有类型为User的Bean注入进来
+       @Autowired
+       private List<User> user;
+       @Autowired
+       private Map<Teacher> teacher;
+       
+       
+       @Autowired
+       public void init(@Qualifier("dao") UserDao userDao,LogDao logDao){
+          
+       }
+      
+   ```
+ * @Qualifier
+ * @Order 值越小越优先
+ * @Lazy 两个地方都要使用此注解才有效
+ 
+ * @Resource与@Inject
+ * Bean作用范围及生命周期方法
+   * @Scope
+   * @PostConstruct
+   * @PreDestroy
+##基于Java类的配置
+ * @Configuration
+ * @Bean
+ * @Import
+ * @ImportResource
+ 
+##Groovy DSL
+#Spring容器高级主题
+##Spring容器技术内幕
+###Spring容器工作机制
+####AbstractApplicationContext#refresh();
+* 初始化BeanFactory。将Bean的定义信息加入到Bean的注册表BeanDefinitionRegistry
+* 调用工厂后处理器。BeanDefinitionRegistry中找出所有实现了BeanFactoryPostProcessor接口的Bean，并调用postProcessBeanFactory()方法。
+* 注册Bean后处理器。BeanDefinitionRegistry中找出所有实现了BeanPostProcessor接口的Bean，并且将它们注册到容器的Bean后处理器的注册表中。
+* 初始化消息源。初始化国际化消息资源。
+* 初始化时间广播器。
+* 初始化其他特殊的Bean。这是一个钩子方法，如AbstractRefreshableWebApplicationContext使用此方法初始化ThemeSource。
+* 注册事件监听器。
+* 初始化所有单例Bean，放入Bean缓存池。
+* 发布上下文刷新事件。
+
+`RedourceLoader->Resource->BeanDefinitionReader->BeanDefinitionRegistry(加工)->InstantiationStrategy->Bean实例(设置属性)->BeanpostProcessor->Bean实例`
+
+BeanWrapper
