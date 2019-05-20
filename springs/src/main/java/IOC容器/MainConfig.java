@@ -5,7 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {"IOC容器", "IOC容器.事件"})
+@ComponentScan(basePackages = {"IOC容器", "IOC容器.事件"},useDefaultFilters = false)
 public class MainConfig {
 
 	@Bean
