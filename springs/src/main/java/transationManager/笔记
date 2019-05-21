@@ -1,0 +1,19 @@
+#Spring事务
+**Spring事务管理功能基于底层数据库本身的事务处理机制。**
+####数据库事务
+* 原子性
+* 一致性
+* 隔离性
+* 持久性
+####数据库锁机制
+* 按锁定的对象，分为行级锁和表级锁。
+* 按并发事务锁定关系，分为共享锁定和独占锁定。
+####数据库事务隔离级别
+* READ UNCOMMITED
+* READ COMMITED
+* REPEATABLE READ
+* SERIALIZABLE 
+####JDBC新增事务的保存点，可以回滚到指定的保存点
+####ThreadLocal
+* InheritableThreadLocal
+
