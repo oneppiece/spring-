@@ -11,14 +11,23 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @Version 1.0
  **/
 public class CurrentMain {
-    public static void main(String[] args) {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AnnotationConfig.class);
-        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
-        for (String beanDefinitionName : beanDefinitionNames) {
-            System.out.println(beanDefinitionName);
-        }
-        GreetingService greetingService = (GreetingService) applicationContext.getBean("proxyFactoryBean");
-        greetingService.sayHi("tom");
-        greetingService.service("jerry");
-    }
+	public static void main(String[] args) {
+		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AnnotationConfig.class);
+//        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
+//        for (String beanDefinitionName : beanDefinitionNames) {
+//            System.out.println(beanDefinitionName);
+//        }
+		FooService greetingService = (FooService) applicationContext.getBean("proxyFactoryBean");
+		try {
+			greetingService.doIt("tom");
+		} catch (Exception e) {
+			System.out.println("-------");
+		}
+		try {
+			greetingService.justDoIt("jerry");
+		} catch (Exception e) {
+			System.out.println("-------");
+		}
+
+	}
 }

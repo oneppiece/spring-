@@ -4,9 +4,8 @@ import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ClassUtils;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * @ClassName AnnotationConfig
@@ -17,21 +16,18 @@ import org.springframework.util.ClassUtils;
  **/
 @Configuration
 @ComponentScan
+@EnableAspectJAutoProxy()
 public class AnnotationConfig {
 
-    @Bean
-    public ProxyFactoryBean proxyFactoryBean(@Autowired GreetingServiceImpl greetingService) {
-        ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
-        try {
-            proxyFactoryBean.setProxyInterfaces(GreetingService.class.getInterfaces());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        proxyFactoryBean.setInterceptorNames("greetingBeforeAdvice");
-        proxyFactoryBean.setTarget(greetingService);
-//        proxyFactoryBean.setSingleton(true);
-//        proxyFactoryBean.setOptimize(true);
-        proxyFactoryBean.setProxyTargetClass(true);
-        return proxyFactoryBean;
-    }
+	@Bean
+	public ProxyFactoryBean proxyFactoryBean(@Autowired GreetingServiceImpl greetingService, @Autowired FooServiceImpl fooService) throws ClassNotFoundException {
+		ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
+		proxyFactoryBean.setProxyInterfaces(FooService.class.getInterfaces());
+		proxyFactoryBean.setInterceptorNames("fooExceptionAdvice");
+		proxyFactoryBean.setTarget(fooService);
+		proxyFactoryBean.setSingleton(true);
+		proxyFactoryBean.setOptimize(true);
+		proxyFactoryBean.setProxyTargetClass(true);
+		return proxyFactoryBean;
+	}
 }

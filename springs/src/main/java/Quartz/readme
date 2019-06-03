@@ -1,0 +1,52 @@
+#Quartz 任务调度框架
+###核心概念
+* Job   表示一个工作，要执行的具体内容。
+* JobDetail  表示一个具体的可执行的调度程序，Job 是这个可执行程调度程序所要执行的内容
+* Trigger  代表一个调度参数的配置，什么时候去调。 
+* Scheduler  代表一个调度容器，一个调度容器中可以注册多个 JobDetail 和 Trigger。当 Trigger 与 JobDetail 组合，就可以被 Scheduler 容器调度了。
+**创建一个任务**
+```
+    //实现Job接口既任务要做的事情
+    public class SayHiJob implements Job{
+        @Override
+        public void execute(JobExecutionContext context) throws JobExecutionException {
+            System.out.println(context + "triggered. Time is " + new Date());
+        }
+    } 
+    //启动任务
+    public static void main(String[] args) throws SchedulerException {
+        runSayDemo();
+    }
+    
+    /**
+     * 工厂模式创建，启动任务 
+     **/
+    public static void runSayDemo() throws SchedulerException {
+        JobDetail jobDetail = JobBuilder.newJob(SayJob.class).withIdentity("job_1", "group_1").build();
+        SimpleTrigger simpleTrigger = TriggerBuilder.newTrigger().withIdentity("trigger_1").startNow().withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(2).repeatForever()).build();
+    
+        StdSchedulerFactory factory = new StdSchedulerFactory();
+        Scheduler scheduler = factory.getScheduler();
+        scheduler.start();
+        scheduler.scheduleJob(jobDetail, simpleTrigger);
+    }
+
+``` 
+##覆盖quartz.properties配置，将任务现场存储到数据库 使非正常退出任务可以还原现场
+```
+    org.quartz.jobStore.class= org.quartz.impl.jdbcjobstore.JobStoreTX
+    org.quartz.jobStore.tablePrefix= QRTZ
+    org.quartz.jobStore.dataSource= qzDS
+    
+    org.quartz.dataSource.qzDS.driver = com.mysql.jdbc.Driver
+    org.quartz.dataSource.qzDS.URL = jdbc:mysql://122.14.196.95:3306/schedule?useSSL=false&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    org.quartz.dataSource.qzDS.user = root
+    org.quartz.dataSource.qzDS.password = Tenry51885188 
+    org.quartz.dataSource.qzDS.maxConnections = 10
+    
+```
+
+
+192.168.20.129
+sa
+Tenry51885188

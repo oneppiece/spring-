@@ -1,0 +1,23 @@
+#缓存
+###缓存的基本概念
+* 缓存命中率  从缓存中读取的次数/总次数(缓存+非缓存)
+* 过期策略   LFU,FIFO,LFU,TTL,TTI
+
+| 系统层级 | 缓存层级 | 使用技术 |
+| :------: | :------: | :------: |
+| web层 | 浏览器缓存，代理服务器缓存，网关缓存 | HTTP头信息控制，代理服务器或CDN，反向代理或间接代理 |
+| 应用层 | 单机缓存，分布式缓存 | JVM或者服务器内存，Ehcache或者Redis |
+| 数据层 | ORM缓存 | Hibernate，JPA一级，二级缓存 |
+###对象要实现序列化接口
+#Spring Cache
+**只能缓存public**
+* @CacheAble
+    * value,cacheNames,key,keyGenerator,condition,unless
+* @CachePut
+    * 使用方法返回值更新缓存
+* @CacheEvict
+    * 删除缓存
+* @Caching
+    * 组合缓存
+* @CacheConfig
+    * 类上，公共配置
