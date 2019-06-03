@@ -7,23 +7,23 @@
 #  I didn't see this anywhere, so I thought I'd post it here. This is the script from Quartz to create the tables in a MySQL database, modified to use INNODB instead of MYISAM.
 ##
 
-
-DROP TABLE IF EXISTS qrtz_fired_triggers;
-DROP TABLE IF EXISTS qrtz_paused_trigger_grps;
-DROP TABLE IF EXISTS qrtz_scheduler_state;
-DROP TABLE IF EXISTS qrtz_locks;
-DROP TABLE IF EXISTS qrtz_simple_triggers;
-DROP TABLE IF EXISTS qrtz_simprop_triggers;
-DROP TABLE IF EXISTS qrtz_cron_triggers;
-DROP TABLE IF EXISTS qrtz_blob_triggers;
-DROP TABLE IF EXISTS qrtz_triggers;
-DROP TABLE IF EXISTS qrtz_job_details;
-DROP TABLE IF EXISTS qrtz_calendars;
+use my_schedules;
+DROP TABLE IF EXISTS qrtz_FIRED_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_PAUSED_TRIGGER_GRPS;
+DROP TABLE IF EXISTS qrtz_SCHEDULER_STATE;
+DROP TABLE IF EXISTS qrtz_LOCKS;
+DROP TABLE IF EXISTS qrtz_SIMPLE_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_SIMPROP_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_CRON_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_BOLB_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_TRIGGERS;
+DROP TABLE IF EXISTS qrtz_JOB_DETAILS;
+DROP TABLE IF EXISTS qrtz_CALENDARS;
 
 
 
 #-- 存储每一个已配置的 Job 的详细信息
-CREATE TABLE qrtz_job_details(
+CREATE TABLE qrtz_JOB_DETAILS(
                                  SCHED_NAME VARCHAR(120) NOT NULL,
                                  JOB_NAME VARCHAR(200) NOT NULL,
                                  JOB_GROUP VARCHAR(200) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE qrtz_job_details(
 
 
 #--存储已配置的 Trigger 的信息
-CREATE TABLE qrtz_triggers (
+CREATE TABLE qrtz_TRIGGERS (
                                SCHED_NAME VARCHAR(120) NOT NULL,
                                TRIGGER_NAME VARCHAR(200) NOT NULL,
                                TRIGGER_GROUP VARCHAR(200) NOT NULL,
@@ -58,12 +58,12 @@ CREATE TABLE qrtz_triggers (
                                JOB_DATA BLOB NULL,
                                PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
                                FOREIGN KEY (SCHED_NAME,JOB_NAME,JOB_GROUP)
-                                   REFERENCES qrtz_job_details(SCHED_NAME,JOB_NAME,JOB_GROUP)
+                                   REFERENCES qrtz_JOB_DETAILS(SCHED_NAME,JOB_NAME,JOB_GROUP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 
 #-- 存储简单的 Trigger，包括重复次数，间隔，以及已触的次数
-CREATE TABLE qrtz_simple_triggers (
+CREATE TABLE qrtz_SIMPLE_TRIGGERS (
                                       SCHED_NAME VARCHAR(120) NOT NULL,
                                       TRIGGER_NAME VARCHAR(200) NOT NULL,
                                       TRIGGER_GROUP VARCHAR(200) NOT NULL,
@@ -72,12 +72,12 @@ CREATE TABLE qrtz_simple_triggers (
                                       TIMES_TRIGGERED BIGINT(10) NOT NULL,
                                       PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
                                       FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
-                                          REFERENCES qrtz_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+                                          REFERENCES qrtz_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 
 #-- 存储 Cron Trigger，包括 Cron 表达式和时区信息
-CREATE TABLE qrtz_cron_triggers (
+CREATE TABLE qrtz_CRON_TRIGGERS (
                                     SCHED_NAME VARCHAR(120) NOT NULL,
                                     TRIGGER_NAME VARCHAR(200) NOT NULL,
                                     TRIGGER_GROUP VARCHAR(200) NOT NULL,
@@ -85,12 +85,12 @@ CREATE TABLE qrtz_cron_triggers (
                                     TIME_ZONE_ID VARCHAR(80),
                                     PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
                                     FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
-                                        REFERENCES qrtz_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+                                        REFERENCES qrtz_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 
 #-- 存储简单的 Trigger，包括重复次数，间隔，以及已触的次数
-CREATE TABLE qrtz_simprop_triggers (
+CREATE TABLE qrtz_SIMPROP_TRIGGERS (
                                        SCHED_NAME VARCHAR(120) NOT NULL,
                                        TRIGGER_NAME VARCHAR(200) NOT NULL,
                                        TRIGGER_GROUP VARCHAR(200) NOT NULL,
@@ -107,12 +107,12 @@ CREATE TABLE qrtz_simprop_triggers (
                                        BOOL_PROP_2 VARCHAR(1) NULL,
                                        PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
                                        FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
-                                           REFERENCES qrtz_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+                                           REFERENCES qrtz_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 #-- Trigger 作为 Blob 类型存储
 #-- (用于 Quartz 用户用 JDBC 创建他们自己定制的 Trigger 类型，JobStore并不知道如何存储实例的时候)
-CREATE TABLE qrtz_blob_triggers (
+CREATE TABLE qrtz_BOLB_TRIGGERS (
                                     SCHED_NAME VARCHAR(120) NOT NULL,
                                     TRIGGER_NAME VARCHAR(200) NOT NULL,
                                     TRIGGER_GROUP VARCHAR(200) NOT NULL,
@@ -120,12 +120,12 @@ CREATE TABLE qrtz_blob_triggers (
                                     PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
                                     INDEX (SCHED_NAME,TRIGGER_NAME, TRIGGER_GROUP),
                                     FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
-                                        REFERENCES qrtz_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+                                        REFERENCES qrtz_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 
 #-- 以 Blob 类型存储 Quartz 的 Calendar 信息
-CREATE TABLE qrtz_calendars (
+CREATE TABLE qrtz_CALENDARS (
                                 SCHED_NAME VARCHAR(120) NOT NULL,
                                 CALENDAR_NAME VARCHAR(200) NOT NULL,
                                 CALENDAR BLOB NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE qrtz_calendars (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 #-- 存储已暂停的 Trigger 组的信息
-CREATE TABLE qrtz_paused_trigger_grps (
+CREATE TABLE qrtz_PAUSED_TRIGGER_GRPS (
                                           SCHED_NAME VARCHAR(120) NOT NULL,
                                           TRIGGER_GROUP VARCHAR(200) NOT NULL,
                                           PRIMARY KEY (SCHED_NAME,TRIGGER_GROUP)
@@ -141,7 +141,7 @@ CREATE TABLE qrtz_paused_trigger_grps (
 
 
 #-- 存储与已触发的 Trigger 相关的状态信息，以及相联 Job 的执行信息
-CREATE TABLE qrtz_fired_triggers (
+CREATE TABLE qrtz_FIRED_TRIGGERS (
                                      SCHED_NAME VARCHAR(120) NOT NULL,
                                      ENTRY_ID VARCHAR(95) NOT NULL,
                                      TRIGGER_NAME VARCHAR(200) NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE qrtz_fired_triggers (
 
 
 #-- 存储少量的有关 Scheduler 的状态信息，和别的 Scheduler 实例(假如是用于一个集群中)
-CREATE TABLE qrtz_scheduler_state (
+CREATE TABLE qrtz_SCHEDULER_STATE (
                                       SCHED_NAME VARCHAR(120) NOT NULL,
                                       INSTANCE_NAME VARCHAR(200) NOT NULL,
                                       LAST_CHECKIN_TIME BIGINT(13) NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE qrtz_scheduler_state (
 
 
 #-- 存储程序的悲观锁的信息(假如使用了悲观锁)
-CREATE TABLE qrtz_locks (
+CREATE TABLE qrtz_LOCKS (
                             SCHED_NAME VARCHAR(120) NOT NULL,
                             LOCK_NAME VARCHAR(40) NOT NULL,
                             PRIMARY KEY (SCHED_NAME,LOCK_NAME)
@@ -178,27 +178,27 @@ CREATE TABLE qrtz_locks (
 
 
 
-CREATE INDEX IDX_QRTZ_J_REQ_RECOVERY ON qrtz_job_details(SCHED_NAME,REQUESTS_RECOVERY);
-CREATE INDEX IDX_QRTZ_J_GRP ON qrtz_job_details(SCHED_NAME,JOB_GROUP);
+CREATE INDEX IDX_QRTZ_J_REQ_RECOVERY ON qrtz_JOB_DETAILS(SCHED_NAME,REQUESTS_RECOVERY);
+CREATE INDEX IDX_QRTZ_J_GRP ON qrtz_JOB_DETAILS(SCHED_NAME,JOB_GROUP);
 
-CREATE INDEX IDX_QRTZ_T_J ON qrtz_triggers(SCHED_NAME,JOB_NAME,JOB_GROUP);
-CREATE INDEX IDX_QRTZ_T_JG ON qrtz_triggers(SCHED_NAME,JOB_GROUP);
-CREATE INDEX IDX_QRTZ_T_C ON qrtz_triggers(SCHED_NAME,CALENDAR_NAME);
-CREATE INDEX IDX_QRTZ_T_G ON qrtz_triggers(SCHED_NAME,TRIGGER_GROUP);
-CREATE INDEX IDX_QRTZ_T_STATE ON qrtz_triggers(SCHED_NAME,TRIGGER_STATE);
-CREATE INDEX IDX_QRTZ_T_N_STATE ON qrtz_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP,TRIGGER_STATE);
-CREATE INDEX IDX_QRTZ_T_N_G_STATE ON qrtz_triggers(SCHED_NAME,TRIGGER_GROUP,TRIGGER_STATE);
-CREATE INDEX IDX_QRTZ_T_NEXT_FIRE_TIME ON qrtz_triggers(SCHED_NAME,NEXT_FIRE_TIME);
-CREATE INDEX IDX_QRTZ_T_NFT_ST ON qrtz_triggers(SCHED_NAME,TRIGGER_STATE,NEXT_FIRE_TIME);
-CREATE INDEX IDX_QRTZ_T_NFT_MISFIRE ON qrtz_triggers(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME);
-CREATE INDEX IDX_QRTZ_T_NFT_ST_MISFIRE ON qrtz_triggers(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME,TRIGGER_STATE);
-CREATE INDEX IDX_QRTZ_T_NFT_ST_MISFIRE_GRP ON qrtz_triggers(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME,TRIGGER_GROUP,TRIGGER_STATE);
+CREATE INDEX IDX_QRTZ_T_J ON qrtz_TRIGGERS(SCHED_NAME,JOB_NAME,JOB_GROUP);
+CREATE INDEX IDX_QRTZ_T_JG ON qrtz_TRIGGERS(SCHED_NAME,JOB_GROUP);
+CREATE INDEX IDX_QRTZ_T_C ON qrtz_TRIGGERS(SCHED_NAME,CALENDAR_NAME);
+CREATE INDEX IDX_QRTZ_T_G ON qrtz_TRIGGERS(SCHED_NAME,TRIGGER_GROUP);
+CREATE INDEX IDX_QRTZ_T_STATE ON qrtz_TRIGGERS(SCHED_NAME,TRIGGER_STATE);
+CREATE INDEX IDX_QRTZ_T_N_STATE ON qrtz_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP,TRIGGER_STATE);
+CREATE INDEX IDX_QRTZ_T_N_G_STATE ON qrtz_TRIGGERS(SCHED_NAME,TRIGGER_GROUP,TRIGGER_STATE);
+CREATE INDEX IDX_QRTZ_T_NEXT_FIRE_TIME ON qrtz_TRIGGERS(SCHED_NAME,NEXT_FIRE_TIME);
+CREATE INDEX IDX_QRTZ_T_NFT_ST ON qrtz_TRIGGERS(SCHED_NAME,TRIGGER_STATE,NEXT_FIRE_TIME);
+CREATE INDEX IDX_QRTZ_T_NFT_MISFIRE ON qrtz_TRIGGERS(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME);
+CREATE INDEX IDX_QRTZ_T_NFT_ST_MISFIRE ON qrtz_TRIGGERS(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME,TRIGGER_STATE);
+CREATE INDEX IDX_QRTZ_T_NFT_ST_MISFIRE_GRP ON qrtz_TRIGGERS(SCHED_NAME,MISFIRE_INSTR,NEXT_FIRE_TIME,TRIGGER_GROUP,TRIGGER_STATE);
 
-CREATE INDEX IDX_QRTZ_FT_TRIG_INST_NAME ON qrtz_fired_triggers(SCHED_NAME,INSTANCE_NAME);
-CREATE INDEX IDX_QRTZ_FT_INST_JOB_REQ_RCVRY ON qrtz_fired_triggers(SCHED_NAME,INSTANCE_NAME,REQUESTS_RECOVERY);
-CREATE INDEX IDX_QRTZ_FT_J_G ON qrtz_fired_triggers(SCHED_NAME,JOB_NAME,JOB_GROUP);
-CREATE INDEX IDX_QRTZ_FT_JG ON qrtz_fired_triggers(SCHED_NAME,JOB_GROUP);
-CREATE INDEX IDX_QRTZ_FT_T_G ON qrtz_fired_triggers(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP);
-CREATE INDEX IDX_QRTZ_FT_TG ON qrtz_fired_triggers(SCHED_NAME,TRIGGER_GROUP);
+CREATE INDEX IDX_QRTZ_FT_TRIG_INST_NAME ON qrtz_FIRED_TRIGGERS(SCHED_NAME,INSTANCE_NAME);
+CREATE INDEX IDX_QRTZ_FT_INST_JOB_REQ_RCVRY ON qrtz_FIRED_TRIGGERS(SCHED_NAME,INSTANCE_NAME,REQUESTS_RECOVERY);
+CREATE INDEX IDX_QRTZ_FT_J_G ON qrtz_FIRED_TRIGGERS(SCHED_NAME,JOB_NAME,JOB_GROUP);
+CREATE INDEX IDX_QRTZ_FT_JG ON qrtz_FIRED_TRIGGERS(SCHED_NAME,JOB_GROUP);
+CREATE INDEX IDX_QRTZ_FT_T_G ON qrtz_FIRED_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP);
+CREATE INDEX IDX_QRTZ_FT_TG ON qrtz_FIRED_TRIGGERS(SCHED_NAME,TRIGGER_GROUP);
 
 commit;
