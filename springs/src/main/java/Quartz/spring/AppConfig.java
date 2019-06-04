@@ -1,12 +1,11 @@
 package Quartz.spring;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.quartz.*;
+import org.quartz.JobDataMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.*;
 
@@ -34,10 +33,13 @@ public class AppConfig {
 		JobDataMap jobDataMap = new JobDataMap();
 		jobDataMap.put("a", 100);
 		jobDetailFactoryBean.setJobClass(MySchedlu2.class);
+		jobDetailFactoryBean.setRequestsRecovery(false);
+		jobDetailFactoryBean.setDescription("测试用的");
 		jobDetailFactoryBean.setName("my_job2");
 		jobDetailFactoryBean.setGroup("group2");
 		jobDetailFactoryBean.setDurability(true);
-		jobDetailFactoryBean.setJobDataMap(jobDataMap);
+		jobDetailFactoryBean.setJobDataAsMap(jobDataMap);
+		jobDetailFactoryBean.setBeanName("jobbbbbb");
 //		jobDetailFactoryBean.setApplicationContextJobDataKey("app");
 		return jobDetailFactoryBean;
 	}
@@ -53,30 +55,21 @@ public class AppConfig {
 		simpleTriggerFactoryBean.setJobDataAsMap(jobMap);
 		simpleTriggerFactoryBean.setRepeatCount(10);
 		simpleTriggerFactoryBean.setRepeatInterval(2000);
-		simpleTriggerFactoryBean.setStartDelay(5000);
+		simpleTriggerFactoryBean.setStartDelay(1000);
 		return simpleTriggerFactoryBean;
 	}
 
 	@Bean
-	public CronTrigger cronTrigger() {
-		CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
-		cronTriggerFactoryBean.setCronExpression("0/5 * * * * ?");
-		cronTriggerFactoryBean.setBeanName("cronTrigger2");
-		CronTrigger cronTrigger = cronTriggerFactoryBean.getObject();
-		return cronTrigger;
-	}
-
-	@Bean
-	public SchedulerFactoryBean scheduler() throws SQLException, SchedulerException, IOException {
+	public SchedulerFactoryBean scheduler() throws SQLException, IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("name", "ss");
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("quartz.properties");
 		Properties properties = new Properties();
 		properties.load(inputStream);
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		schedulerFactoryBean.setExposeSchedulerInRepository(true);
-		schedulerFactoryBean.setJobDetails(jobDetailBean().getObject());
-		schedulerFactoryBean.setTriggers(simpleTrigger().getObject());
+		schedulerFactoryBean.setExposeSchedulerInRepository(false);
+		schedulerFactoryBean.setJobDetails(jobDetailBean().getObject(), methodInvokingBean().getObject());
+		schedulerFactoryBean.setTriggers(simpleTrigger().getObject(), cronTrigger().getObject());
 		schedulerFactoryBean.setSchedulerContextAsMap(map);
 		schedulerFactoryBean.setQuartzProperties(properties);
 		schedulerFactoryBean.setDataSource(dataSource());
@@ -89,14 +82,23 @@ public class AppConfig {
 	//方式2
 	@Bean
 	@DependsOn({"job1"})
-	public JobDetail methodInvokingBean() {
+	public MethodInvokingJobDetailFactoryBean methodInvokingBean() {
 		MethodInvokingJobDetailFactoryBean methodInvokingJobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
 		methodInvokingJobDetailFactoryBean.setGroup("group1");
 		methodInvokingJobDetailFactoryBean.setTargetBeanName("job1");
 		methodInvokingJobDetailFactoryBean.setTargetMethod("doJob");
 		methodInvokingJobDetailFactoryBean.setConcurrent(false);
-		JobDetail jobDetailFactoryBeanObject = methodInvokingJobDetailFactoryBean.getObject();
-		return jobDetailFactoryBeanObject;
+		return methodInvokingJobDetailFactoryBean;
+	}
+
+	@Bean
+	public CronTriggerFactoryBean cronTrigger() {
+		CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
+		cronTriggerFactoryBean.setCronExpression("0/5 * * * * ?");
+		cronTriggerFactoryBean.setBeanName("cronTrigger2");
+		cronTriggerFactoryBean.setJobDetail(methodInvokingBean().getObject());
+		cronTriggerFactoryBean.setDescription("方式二");
+		return cronTriggerFactoryBean;
 	}
 
 
@@ -107,7 +109,7 @@ public class AppConfig {
 		hikariDataSource.setPassword("root");
 		hikariDataSource.setLoginTimeout(10);
 		hikariDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		hikariDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/my_schedules");
+		hikariDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/my_schedules?useSSL=false");
 		return hikariDataSource;
 	}
 }

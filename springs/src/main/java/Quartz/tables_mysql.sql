@@ -1,3 +1,26 @@
+truncate table qrtz_SIMPLE_TRIGGERS;
+truncate table qrtz_BOLB_TRIGGERS;
+
+truncate table qrtz_CALENDARS;
+
+truncate table qrtz_CRON_TRIGGERS;
+
+truncate table qrtz_FIRED_TRIGGERS;
+
+truncate table qrtz_LOCKS;
+
+truncate table qrtz_PAUSED_TRIGGER_GRPS;
+
+truncate table qrtz_SCHEDULER_STATE;
+
+
+truncate table qrtz_SIMPROP_TRIGGERS;
+
+
+truncate table qrtz_JOB_DETAILS;
+
+truncate table qrtz_TRIGGERS;
+
 #
 ## In your Quartz properties file, you'll need to set
 ## org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate
